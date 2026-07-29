@@ -33,8 +33,8 @@ public interface GeTrendsConfig extends Config
 
 	@ConfigItem(
 		keyName = "coinBalanceSync",
-		name = "Sync GP balance",
-		description = "Send only the GP value of coins (995) and platinum tokens (13204) from inventory and bank.",
+		name = "Full portfolio mode",
+		description = "Off: track GE investments only. On: also include inventory and bank coins and platinum tokens in total wealth.",
 		position = 2,
 		warning = "This feature submits the GP value of your inventory and bank coins and platinum tokens to a 3rd-party server not controlled or verified by RuneLite developers"
 	)

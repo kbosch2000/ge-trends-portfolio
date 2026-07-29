@@ -7,7 +7,7 @@ the GE Trends account connected by a revocable token.
 
 The plugin sends the GE slot, item ID, offer state, filled and requested
 quantities, cumulative coins spent or received, offer price, and observation
-time. If the separate **Sync GP balance** option is enabled, it also reads coins
+time. If the separate **Full portfolio mode** option is enabled, it also reads coins
 (item ID 995) and platinum tokens (item ID 13204) held in inventory and bank,
 converts both to GP, and sends one combined liquid-GP value. It never sends the
 contents of other inventory or bank slots or the two component quantities.
@@ -26,6 +26,8 @@ portfolio transactions. Optional aggregate coin balances are used only to keep
 the connected account's portfolio cash accurate. Imported transactions, the
 latest state of each GE slot, and the latest submitted coin balance are retained
 in that account so the portfolio remains accurate across sessions and devices.
+Switching Full portfolio mode off deletes the latest submitted coin balance and
+excludes liquid GP from portfolio and leaderboard totals.
 
 ## User control
 

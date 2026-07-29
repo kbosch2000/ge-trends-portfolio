@@ -76,6 +76,11 @@ public class GeTrendsSecurityTest
 		assertTrue(request.url().isHttps());
 		assertEquals("ge-trends.vercel.app", request.url().host());
 		assertEquals("/api/portfolio/coins", request.url().encodedPath());
+
+		Request disableRequest = GeTrendsPlugin.createDeleteRequest(GeTrendsPlugin.COINS_URL, "token");
+		assertEquals("DELETE", disableRequest.method());
+		assertEquals("Bearer token", disableRequest.header("Authorization"));
+		assertEquals("ge-trends.vercel.app", disableRequest.url().host());
 	}
 
 	@Test

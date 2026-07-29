@@ -15,6 +15,7 @@ import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.gameval.ItemID;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.config.ConfigManager;
@@ -69,6 +70,10 @@ public class GeTrendsPlugin extends Plugin
 	{
 		bankGp = -1;
 		lastSentGp = -1;
+		if (config.cloudSync() && !config.coinBalanceSync())
+		{
+			sendCoinTrackingDisabled();
+		}
 		log.info("GE Trends Portfolio tracker started");
 	}
 
@@ -175,6 +180,31 @@ public class GeTrendsPlugin extends Plugin
 		}
 	}
 
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (!"ge-trends-portfolio".equals(event.getGroup()))
+		{
+			return;
+		}
+
+		if ("coinBalanceSync".equals(event.getKey()))
+		{
+			bankGp = -1;
+			lastSentGp = -1;
+			if (config.cloudSync() && !config.coinBalanceSync())
+			{
+				sendCoinTrackingDisabled();
+			}
+		}
+		else if ("cloudSync".equals(event.getKey())
+			&& config.cloudSync()
+			&& !config.coinBalanceSync())
+		{
+			sendCoinTrackingDisabled();
+		}
+	}
+
 	static long liquidGpValue(ItemContainer container)
 	{
 		return liquidGpValue(
@@ -210,6 +240,17 @@ public class GeTrendsPlugin extends Plugin
 				}
 			}
 		});
+	}
+
+	private void sendCoinTrackingDisabled()
+	{
+		String token = config.apiToken().trim();
+		if (token.isEmpty())
+		{
+			return;
+		}
+
+		sendRequest(createDeleteRequest(COINS_URL, token), "tracking mode");
 	}
 
 	static JsonObject createSnapshot(
@@ -249,6 +290,16 @@ public class GeTrendsPlugin extends Plugin
 			.header("Authorization", "Bearer " + token)
 			.header("Cache-Control", "no-store")
 			.post(RequestBody.create(JSON, snapshotJson))
+			.build();
+	}
+
+	static Request createDeleteRequest(String url, String token)
+	{
+		return new Request.Builder()
+			.url(url)
+			.header("Authorization", "Bearer " + token)
+			.header("Cache-Control", "no-store")
+			.delete()
 			.build();
 	}
 }

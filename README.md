@@ -9,11 +9,16 @@ each snapshot with the previous snapshot for the same slot, so partial fills,
 completed offers, cancellations, and fills observed after a relog can be
 recorded without interacting with the game.
 
-An additional, separately opt-in setting listens for changes to coins (item ID
+The plugin has two tracking modes. The default **Investments only** mode tracks
+GE purchases, sales, holdings, and open offers without including the player's
+general cash stack. The separately opt-in **Full portfolio** mode listens for
+changes to coins (item ID
 995) and platinum tokens (item ID 13204), converts tokens at 1,000 GP each, and
 sends one combined liquid-GP value. No other inventory or bank item is read or
 transmitted, and the two component quantities are not sent. The first balance is
-sent only after the bank has been opened during that RuneLite session.
+sent only after the bank has been opened during that RuneLite session. Switching
+back to Investments only removes the previously stored liquid-GP snapshot from
+portfolio and leaderboard totals.
 
 ## Install and connect
 
@@ -26,8 +31,9 @@ below. After acceptance:
 4. Open the plugin settings and paste the token into **Connection token**.
 5. Enable **Cloud portfolio sync** and accept RuneLite's third-party-server
    warning.
-6. Optionally enable **Sync GP balance**, accept its warning, and open the bank
-   once so the plugin can establish a complete inventory-plus-bank balance.
+6. Leave **Full portfolio mode** off to track investments only, or enable it,
+   accept its warning, and open the bank once so the plugin can establish a
+   complete inventory-plus-bank balance.
 
 Both settings are disabled by default.
 
@@ -43,7 +49,7 @@ Each HTTPS request contains only:
 - offer price; and
 - observation time.
 
-If **Sync GP balance** is separately enabled, a coin-balance request contains
+If **Full portfolio mode** is separately enabled, a coin-balance request contains
 only:
 
 - the combined GP value of inventory and bank coins plus platinum tokens; and
