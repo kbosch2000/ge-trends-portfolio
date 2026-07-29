@@ -5,8 +5,15 @@ import com.google.gson.JsonObject;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.GrandExchangeOffer;
+import net.runelite.api.ItemContainer;
 import net.runelite.api.events.GrandExchangeOfferChanged;
+import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.gameval.InventoryID;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -31,7 +38,11 @@ import java.time.Instant;
 public class GeTrendsPlugin extends Plugin
 {
 	static final String SNAPSHOT_URL = "https://ge-trends.vercel.app/api/portfolio/snapshot";
+	static final String COINS_URL = "https://ge-trends.vercel.app/api/portfolio/coins";
 	private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
+
+	@Inject
+	private Client client;
 
 	@Inject
 	private OkHttpClient httpClient;
@@ -42,6 +53,9 @@ public class GeTrendsPlugin extends Plugin
 	@Inject
 	private GeTrendsConfig config;
 
+	private int bankCoins = -1;
+	private long lastSentCoins = -1;
+
 	@Provides
 	GeTrendsConfig provideConfig(ConfigManager configManager)
 	{
@@ -51,12 +65,16 @@ public class GeTrendsPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
+		bankCoins = -1;
+		lastSentCoins = -1;
 		log.info("GE Trends Portfolio tracker started");
 	}
 
 	@Override
 	protected void shutDown()
 	{
+		bankCoins = -1;
+		lastSentCoins = -1;
 		// Enqueued requests are short-lived and owned by RuneLite's shared client.
 		log.info("GE Trends Portfolio tracker stopped");
 	}
@@ -88,7 +106,75 @@ public class GeTrendsPlugin extends Plugin
 			Instant.now().toString()
 		);
 
-		Request request = createRequest(token, gson.toJson(snapshot));
+		Request request = createRequest(SNAPSHOT_URL, token, gson.toJson(snapshot));
+		sendRequest(request, "offer update");
+	}
+
+	@Subscribe
+	public void onItemContainerChanged(ItemContainerChanged event)
+	{
+		if (!config.cloudSync() || !config.coinBalanceSync())
+		{
+			return;
+		}
+
+		int containerId = event.getContainerId();
+		if (containerId != InventoryID.INV && containerId != InventoryID.BANK)
+		{
+			return;
+		}
+
+		if (containerId == InventoryID.BANK)
+		{
+			bankCoins = event.getItemContainer().count(ItemID.COINS);
+		}
+
+		// A bank count is deliberately required before sending a total. This avoids
+		// treating inventory-only GP as the complete portfolio cash balance.
+		if (bankCoins < 0)
+		{
+			return;
+		}
+
+		ItemContainer inventory = client.getItemContainer(InventoryID.INV);
+		if (inventory == null)
+		{
+			return;
+		}
+
+		long totalCoins = (long) inventory.count(ItemID.COINS) + bankCoins;
+		if (totalCoins == lastSentCoins)
+		{
+			return;
+		}
+
+		String token = config.apiToken().trim();
+		if (token.isEmpty())
+		{
+			return;
+		}
+
+		lastSentCoins = totalCoins;
+		JsonObject snapshot = createCoinSnapshot(totalCoins, Instant.now().toString());
+		Request request = createRequest(COINS_URL, token, gson.toJson(snapshot));
+		sendRequest(request, "coin balance");
+	}
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged event)
+	{
+		if (event.getGameState() == GameState.LOGIN_SCREEN
+			|| event.getGameState() == GameState.HOPPING
+			|| event.getGameState() == GameState.CONNECTION_LOST)
+		{
+			// Never carry a cached bank balance into another character or session.
+			bankCoins = -1;
+			lastSentCoins = -1;
+		}
+	}
+
+	private void sendRequest(Request request, String updateType)
+	{
 		httpClient.newCall(request).enqueue(new Callback()
 		{
 			@Override
@@ -104,7 +190,7 @@ public class GeTrendsPlugin extends Plugin
 				{
 					if (!response.isSuccessful())
 					{
-						log.debug("GE Trends rejected an offer update with HTTP {}", response.code());
+						log.debug("GE Trends rejected a {} update with HTTP {}", updateType, response.code());
 					}
 				}
 			}
@@ -133,10 +219,18 @@ public class GeTrendsPlugin extends Plugin
 		return snapshot;
 	}
 
-	static Request createRequest(String token, String snapshotJson)
+	static JsonObject createCoinSnapshot(long totalCoins, String observedAt)
+	{
+		JsonObject snapshot = new JsonObject();
+		snapshot.addProperty("totalCoins", totalCoins);
+		snapshot.addProperty("observedAt", observedAt);
+		return snapshot;
+	}
+
+	static Request createRequest(String url, String token, String snapshotJson)
 	{
 		return new Request.Builder()
-			.url(SNAPSHOT_URL)
+			.url(url)
 			.header("Authorization", "Bearer " + token)
 			.header("Cache-Control", "no-store")
 			.post(RequestBody.create(JSON, snapshotJson))

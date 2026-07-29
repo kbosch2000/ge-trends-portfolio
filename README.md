@@ -3,11 +3,16 @@
 GE Trends Portfolio is an opt-in, read-only RuneLite integration for the
 [GE Trends investment platform](https://ge-trends.vercel.app).
 
-It listens only for RuneLite's `GrandExchangeOfferChanged` event and sends
-cumulative offer snapshots to the user's private portfolio. GE Trends compares
+It listens for RuneLite's `GrandExchangeOfferChanged` event and sends cumulative
+offer snapshots to the user's private portfolio. GE Trends compares
 each snapshot with the previous snapshot for the same slot, so partial fills,
 completed offers, cancellations, and fills observed after a relog can be
 recorded without interacting with the game.
+
+An additional, separately opt-in setting listens for coin-stack changes and
+sends only the combined number of coins (item ID 995) held in inventory and
+bank. No other inventory or bank item is read or transmitted. The first balance
+is sent only after the bank has been opened during that RuneLite session.
 
 ## Install and connect
 
@@ -20,8 +25,10 @@ below. After acceptance:
 4. Open the plugin settings and paste the token into **Connection token**.
 5. Enable **Cloud portfolio sync** and accept RuneLite's third-party-server
    warning.
+6. Optionally enable **Sync GP balance**, accept its warning, and open the bank
+   once so the plugin can establish a complete inventory-plus-bank balance.
 
-Syncing is disabled by default.
+Both settings are disabled by default.
 
 ## Exactly what is transmitted
 
@@ -35,20 +42,27 @@ Each HTTPS request contains only:
 - offer price; and
 - observation time.
 
+If **Sync GP balance** is separately enabled, a coin-balance request contains
+only:
+
+- the combined inventory and bank quantity of coins (item ID 995); and
+- observation time.
+
 The request also contains the revocable GE Trends connection token in its
 `Authorization` header. Like every HTTPS request, the user's IP address is
 necessarily visible to the hosting provider.
 
 The plugin does **not** send a RuneScape character name, Jagex credentials,
-RuneLite account identity, inventory, bank, equipment, location, chat, or
-information about other players.
+RuneLite account identity, any non-coin inventory or bank item, equipment,
+location, chat, or information about other players.
 
 See [PRIVACY.md](PRIVACY.md) for retention and control details.
 
 ## Security design
 
-- The only network destination is the fixed HTTPS endpoint
-  `https://ge-trends.vercel.app/api/portfolio/snapshot`.
+- The only network destinations are the fixed HTTPS endpoints
+  `https://ge-trends.vercel.app/api/portfolio/snapshot` and
+  `https://ge-trends.vercel.app/api/portfolio/coins`.
 - The destination cannot be changed in plugin settings, preventing a connection
   token from being redirected to another host.
 - The token can only submit GE snapshots. It cannot read a portfolio, sign in,

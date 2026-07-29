@@ -48,7 +48,7 @@ public class GeTrendsSecurityTest
 	public void requestUsesFixedHttpsEndpointAndAuthorizationHeader()
 	{
 		String token = "test-token-that-is-never-logged";
-		Request request = GeTrendsPlugin.createRequest(token, "{}");
+		Request request = GeTrendsPlugin.createRequest(GeTrendsPlugin.SNAPSHOT_URL, token, "{}");
 
 		assertTrue(request.url().isHttps());
 		assertEquals("ge-trends.vercel.app", request.url().host());
@@ -59,6 +59,26 @@ public class GeTrendsSecurityTest
 	}
 
 	@Test
+	public void coinSnapshotContainsOnlyAggregateBalanceAndTime()
+	{
+		JsonObject snapshot = GeTrendsPlugin.createCoinSnapshot(
+			123_456_789L,
+			"2026-07-29T12:00:00Z"
+		);
+
+		Set<String> expected = new HashSet<>(Arrays.asList("totalCoins", "observedAt"));
+		assertEquals(expected, snapshot.keySet());
+		assertFalse(snapshot.has("items"));
+		assertFalse(snapshot.has("inventory"));
+		assertFalse(snapshot.has("bank"));
+
+		Request request = GeTrendsPlugin.createRequest(GeTrendsPlugin.COINS_URL, "token", "{}");
+		assertTrue(request.url().isHttps());
+		assertEquals("ge-trends.vercel.app", request.url().host());
+		assertEquals("/api/portfolio/coins", request.url().encodedPath());
+	}
+
+	@Test
 	public void cloudSynchronizationIsOptIn()
 	{
 		GeTrendsConfig config = new GeTrendsConfig()
@@ -66,6 +86,7 @@ public class GeTrendsSecurityTest
 		};
 
 		assertFalse(config.cloudSync());
+		assertFalse(config.coinBalanceSync());
 		assertTrue(config.apiToken().isEmpty());
 	}
 }
