@@ -7,9 +7,10 @@ the GE Trends account connected by a revocable token.
 
 The plugin sends the GE slot, item ID, offer state, filled and requested
 quantities, cumulative coins spent or received, offer price, and observation
-time. If the separate **Sync GP balance** option is enabled, it also sends the
-combined quantity of coins (item ID 995) held in inventory and bank. It never
-sends the contents of other inventory or bank slots.
+time. If the separate **Sync GP balance** option is enabled, it also reads coins
+(item ID 995) and platinum tokens (item ID 13204) held in inventory and bank,
+converts both to GP, and sends one combined liquid-GP value. It never sends the
+contents of other inventory or bank slots or the two component quantities.
 
 It does not send a character name, Jagex credentials, RuneLite account identity,
 equipment, location, chat, or other-player data.

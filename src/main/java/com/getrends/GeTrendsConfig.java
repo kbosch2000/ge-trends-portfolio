@@ -34,9 +34,9 @@ public interface GeTrendsConfig extends Config
 	@ConfigItem(
 		keyName = "coinBalanceSync",
 		name = "Sync GP balance",
-		description = "Send only your coin count (item 995) from inventory and bank so GE Trends can keep portfolio cash accurate.",
+		description = "Send only the GP value of coins (995) and platinum tokens (13204) from inventory and bank.",
 		position = 2,
-		warning = "This feature submits your inventory and bank coin quantities to a 3rd-party server not controlled or verified by RuneLite developers"
+		warning = "This feature submits the GP value of your inventory and bank coins and platinum tokens to a 3rd-party server not controlled or verified by RuneLite developers"
 	)
 	default boolean coinBalanceSync()
 	{

@@ -66,7 +66,7 @@ public class GeTrendsSecurityTest
 			"2026-07-29T12:00:00Z"
 		);
 
-		Set<String> expected = new HashSet<>(Arrays.asList("totalCoins", "observedAt"));
+		Set<String> expected = new HashSet<>(Arrays.asList("totalGp", "observedAt"));
 		assertEquals(expected, snapshot.keySet());
 		assertFalse(snapshot.has("items"));
 		assertFalse(snapshot.has("inventory"));
@@ -76,6 +76,12 @@ public class GeTrendsSecurityTest
 		assertTrue(request.url().isHttps());
 		assertEquals("ge-trends.vercel.app", request.url().host());
 		assertEquals("/api/portfolio/coins", request.url().encodedPath());
+	}
+
+	@Test
+	public void platinumTokensAreConvertedWithoutIntegerOverflow()
+	{
+		assertEquals(2_147_484_000L, GeTrendsPlugin.liquidGpValue(1_000, 2_147_483));
 	}
 
 	@Test

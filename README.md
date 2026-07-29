@@ -9,10 +9,11 @@ each snapshot with the previous snapshot for the same slot, so partial fills,
 completed offers, cancellations, and fills observed after a relog can be
 recorded without interacting with the game.
 
-An additional, separately opt-in setting listens for coin-stack changes and
-sends only the combined number of coins (item ID 995) held in inventory and
-bank. No other inventory or bank item is read or transmitted. The first balance
-is sent only after the bank has been opened during that RuneLite session.
+An additional, separately opt-in setting listens for changes to coins (item ID
+995) and platinum tokens (item ID 13204), converts tokens at 1,000 GP each, and
+sends one combined liquid-GP value. No other inventory or bank item is read or
+transmitted, and the two component quantities are not sent. The first balance is
+sent only after the bank has been opened during that RuneLite session.
 
 ## Install and connect
 
@@ -45,7 +46,7 @@ Each HTTPS request contains only:
 If **Sync GP balance** is separately enabled, a coin-balance request contains
 only:
 
-- the combined inventory and bank quantity of coins (item ID 995); and
+- the combined GP value of inventory and bank coins plus platinum tokens; and
 - observation time.
 
 The request also contains the revocable GE Trends connection token in its
@@ -53,8 +54,8 @@ The request also contains the revocable GE Trends connection token in its
 necessarily visible to the hosting provider.
 
 The plugin does **not** send a RuneScape character name, Jagex credentials,
-RuneLite account identity, any non-coin inventory or bank item, equipment,
-location, chat, or information about other players.
+RuneLite account identity, any inventory or bank item other than coins and
+platinum tokens, equipment, location, chat, or information about other players.
 
 See [PRIVACY.md](PRIVACY.md) for retention and control details.
 

@@ -53,8 +53,10 @@ public class GeTrendsPlugin extends Plugin
 	@Inject
 	private GeTrendsConfig config;
 
-	private int bankCoins = -1;
-	private long lastSentCoins = -1;
+	private static final long PLATINUM_TOKEN_GP = 1_000L;
+
+	private long bankGp = -1;
+	private long lastSentGp = -1;
 
 	@Provides
 	GeTrendsConfig provideConfig(ConfigManager configManager)
@@ -65,16 +67,16 @@ public class GeTrendsPlugin extends Plugin
 	@Override
 	protected void startUp()
 	{
-		bankCoins = -1;
-		lastSentCoins = -1;
+		bankGp = -1;
+		lastSentGp = -1;
 		log.info("GE Trends Portfolio tracker started");
 	}
 
 	@Override
 	protected void shutDown()
 	{
-		bankCoins = -1;
-		lastSentCoins = -1;
+		bankGp = -1;
+		lastSentGp = -1;
 		// Enqueued requests are short-lived and owned by RuneLite's shared client.
 		log.info("GE Trends Portfolio tracker stopped");
 	}
@@ -126,12 +128,12 @@ public class GeTrendsPlugin extends Plugin
 
 		if (containerId == InventoryID.BANK)
 		{
-			bankCoins = event.getItemContainer().count(ItemID.COINS);
+			bankGp = liquidGpValue(event.getItemContainer());
 		}
 
 		// A bank count is deliberately required before sending a total. This avoids
 		// treating inventory-only GP as the complete portfolio cash balance.
-		if (bankCoins < 0)
+		if (bankGp < 0)
 		{
 			return;
 		}
@@ -142,8 +144,8 @@ public class GeTrendsPlugin extends Plugin
 			return;
 		}
 
-		long totalCoins = (long) inventory.count(ItemID.COINS) + bankCoins;
-		if (totalCoins == lastSentCoins)
+		long totalGp = liquidGpValue(inventory) + bankGp;
+		if (totalGp == lastSentGp)
 		{
 			return;
 		}
@@ -154,8 +156,8 @@ public class GeTrendsPlugin extends Plugin
 			return;
 		}
 
-		lastSentCoins = totalCoins;
-		JsonObject snapshot = createCoinSnapshot(totalCoins, Instant.now().toString());
+		lastSentGp = totalGp;
+		JsonObject snapshot = createCoinSnapshot(totalGp, Instant.now().toString());
 		Request request = createRequest(COINS_URL, token, gson.toJson(snapshot));
 		sendRequest(request, "coin balance");
 	}
@@ -168,9 +170,22 @@ public class GeTrendsPlugin extends Plugin
 			|| event.getGameState() == GameState.CONNECTION_LOST)
 		{
 			// Never carry a cached bank balance into another character or session.
-			bankCoins = -1;
-			lastSentCoins = -1;
+			bankGp = -1;
+			lastSentGp = -1;
 		}
+	}
+
+	static long liquidGpValue(ItemContainer container)
+	{
+		return liquidGpValue(
+			container.count(ItemID.COINS),
+			container.count(ItemID.PLATINUM)
+		);
+	}
+
+	static long liquidGpValue(int coins, int platinumTokens)
+	{
+		return (long) coins + (long) platinumTokens * PLATINUM_TOKEN_GP;
 	}
 
 	private void sendRequest(Request request, String updateType)
@@ -219,10 +234,10 @@ public class GeTrendsPlugin extends Plugin
 		return snapshot;
 	}
 
-	static JsonObject createCoinSnapshot(long totalCoins, String observedAt)
+	static JsonObject createCoinSnapshot(long totalGp, String observedAt)
 	{
 		JsonObject snapshot = new JsonObject();
-		snapshot.addProperty("totalCoins", totalCoins);
+		snapshot.addProperty("totalGp", totalGp);
 		snapshot.addProperty("observedAt", observedAt);
 		return snapshot;
 	}
