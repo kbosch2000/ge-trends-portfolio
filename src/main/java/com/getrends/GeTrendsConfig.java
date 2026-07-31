@@ -42,4 +42,16 @@ public interface GeTrendsConfig extends Config
 	{
 		return false;
 	}
+
+	@ConfigItem(
+		keyName = "marketLookup",
+		name = "Market lookup",
+		description = "Look up public OSRS Wiki prices and charts inside the GE Trends panel.",
+		position = 3,
+		warning = "This feature submits your IP address and item searches to prices.runescape.wiki, a 3rd-party server not controlled or verified by RuneLite developers"
+	)
+	default boolean marketLookup()
+	{
+		return false;
+	}
 }

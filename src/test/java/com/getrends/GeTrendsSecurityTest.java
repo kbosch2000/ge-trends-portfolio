@@ -98,6 +98,22 @@ public class GeTrendsSecurityTest
 
 		assertFalse(config.cloudSync());
 		assertFalse(config.coinBalanceSync());
+		assertFalse(config.marketLookup());
 		assertTrue(config.apiToken().isEmpty());
+	}
+
+	@Test
+	public void companionUsesOnlyDocumentedFixedHosts()
+	{
+		assertEquals(
+			"https://ge-trends.vercel.app/api/portfolio/plugin",
+			GeTrendsApiClient.PORTFOLIO_URL
+		);
+		assertTrue(GeTrendsApiClient.WIKI_MAPPING_URL.startsWith(
+			"https://prices.runescape.wiki/api/v1/osrs/"));
+		assertTrue(GeTrendsApiClient.WIKI_LATEST_URL.startsWith(
+			"https://prices.runescape.wiki/api/v1/osrs/"));
+		assertTrue(GeTrendsApiClient.WIKI_TIMESERIES_URL.startsWith(
+			"https://prices.runescape.wiki/api/v1/osrs/"));
 	}
 }

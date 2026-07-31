@@ -19,6 +19,8 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.MediaType;
@@ -32,9 +34,9 @@ import java.time.Instant;
 
 @Slf4j
 @PluginDescriptor(
-	name = "GE Trends Portfolio",
-	description = "Sends read-only Grand Exchange offer updates to your private GE Trends portfolio",
-	tags = {"grand exchange", "investment", "portfolio", "profit"}
+	name = "GE Trends",
+	description = "Tracks your private GE portfolio and provides live Wiki market lookup from anywhere",
+	tags = {"grand exchange", "investment", "portfolio", "profit", "prices", "market"}
 )
 public class GeTrendsPlugin extends Plugin
 {
@@ -54,10 +56,17 @@ public class GeTrendsPlugin extends Plugin
 	@Inject
 	private GeTrendsConfig config;
 
+	@Inject
+	private ClientToolbar clientToolbar;
+
+	@Inject
+	private GeTrendsPanel panel;
+
 	private static final long PLATINUM_TOKEN_GP = 1_000L;
 
 	private long bankGp = -1;
 	private long lastSentGp = -1;
+	private NavigationButton navigationButton;
 
 	@Provides
 	GeTrendsConfig provideConfig(ConfigManager configManager)
@@ -70,20 +79,32 @@ public class GeTrendsPlugin extends Plugin
 	{
 		bankGp = -1;
 		lastSentGp = -1;
+		navigationButton = NavigationButton.builder()
+			.tooltip("GE Trends")
+			.icon(BrandIcon.create())
+			.priority(6)
+			.panel(panel)
+			.build();
+		clientToolbar.addNavigation(navigationButton);
 		if (config.cloudSync() && !config.coinBalanceSync())
 		{
 			sendCoinTrackingDisabled();
 		}
-		log.info("GE Trends Portfolio tracker started");
+		log.info("GE Trends started");
 	}
 
 	@Override
 	protected void shutDown()
 	{
+		if (navigationButton != null)
+		{
+			clientToolbar.removeNavigation(navigationButton);
+			navigationButton = null;
+		}
 		bankGp = -1;
 		lastSentGp = -1;
 		// Enqueued requests are short-lived and owned by RuneLite's shared client.
-		log.info("GE Trends Portfolio tracker stopped");
+		log.info("GE Trends stopped");
 	}
 
 	@Subscribe

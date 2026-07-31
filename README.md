@@ -1,12 +1,19 @@
-# GE Trends Portfolio
+# GE Trends
 
-GE Trends Portfolio is an opt-in, read-only RuneLite integration for the
+GE Trends is an opt-in, read-only RuneLite companion for the
 [GE Trends investment platform](https://ge-trends.vercel.app).
 
-It listens for RuneLite's `GrandExchangeOfferChanged` event and sends cumulative
-offer snapshots to the user's private portfolio. GE Trends compares
-each snapshot with the previous snapshot for the same slot, so partial fills,
-completed offers, cancellations, and fills observed after a relog can be
+The sidebar contains:
+
+- **Portfolio** — a compact view of the connected user's own portfolio value,
+  realized and unrealized P/L, liquid GP, GE-held GP, and open investments.
+- **Market** — item search, live Wiki high/buy and low/sell prices, spread, GE
+  buy limit, and a compact 30-day chart usable from anywhere in game.
+
+The plugin also listens for RuneLite's `GrandExchangeOfferChanged` event and
+sends cumulative offer snapshots to the user's private portfolio. GE Trends
+compares each snapshot with the previous snapshot for the same slot, so partial
+fills, completed offers, cancellations, and fills observed after a relog can be
 recorded without interacting with the game.
 
 The plugin has two tracking modes. The default **Investments only** mode tracks
@@ -25,7 +32,7 @@ portfolio and leaderboard totals.
 While the plugin is awaiting Plugin Hub review, use the development instructions
 below. After acceptance:
 
-1. Install **GE Trends Portfolio** from RuneLite Plugin Hub.
+1. Install **GE Trends** from RuneLite Plugin Hub.
 2. Sign in to <https://ge-trends.vercel.app>.
 3. Open **Account**, generate a RuneLite connection token, and copy it.
 4. Open the plugin settings and paste the token into **Connection token**.
@@ -34,8 +41,10 @@ below. After acceptance:
 6. Leave **Full portfolio mode** off to track investments only, or enable it,
    accept its warning, and open the bank once so the plugin can establish a
    complete inventory-plus-bank balance.
+7. Optionally enable **Market lookup** and accept its separate Wiki-network
+   warning to use item search and charts inside RuneLite.
 
-Both settings are disabled by default.
+All networked features are disabled by default.
 
 ## Exactly what is transmitted
 
@@ -59,6 +68,17 @@ The request also contains the revocable GE Trends connection token in its
 `Authorization` header. Like every HTTPS request, the user's IP address is
 necessarily visible to the hosting provider.
 
+When the connected user opens or refreshes the Portfolio panel, the token is
+sent to the fixed GE Trends portfolio endpoint. The response contains only that
+token owner's summarized totals and current holdings. It does not contain an
+email address, password, MFA data, raw token, other member data, or account
+administration controls.
+
+When **Market lookup** is enabled and used, the item search catalog, latest
+price, and 30-day time series are requested from the public OSRS Wiki price API.
+The requested item ID and the user's IP address are visible to the Wiki hosting
+provider. No GE Trends token or RuneLite identity is included in Wiki requests.
+
 The plugin does **not** send a RuneScape character name, Jagex credentials,
 RuneLite account identity, any inventory or bank item other than coins and
 platinum tokens, equipment, location, chat, or information about other players.
@@ -69,11 +89,14 @@ See [PRIVACY.md](PRIVACY.md) for retention and control details.
 
 - The only network destinations are the fixed HTTPS endpoints
   `https://ge-trends.vercel.app/api/portfolio/snapshot` and
-  `https://ge-trends.vercel.app/api/portfolio/coins`.
+  `https://ge-trends.vercel.app/api/portfolio/coins`,
+  `https://ge-trends.vercel.app/api/portfolio/plugin`, and the fixed public API
+  prefix `https://prices.runescape.wiki/api/v1/osrs/`.
 - The destination cannot be changed in plugin settings, preventing a connection
   token from being redirected to another host.
-- The token can only submit GE snapshots. It cannot read a portfolio, sign in,
-  place offers, or perform any game action.
+- The token can submit GE snapshots and read only its owner's summarized
+  portfolio and holdings. It cannot sign in, read another account, change
+  account settings, place offers, or perform any game action.
 - Tokens are stored hashed by GE Trends and can be replaced or revoked from the
   user's account page.
 - The plugin uses RuneLite's injected `OkHttpClient` and `Gson`.

@@ -10,5 +10,7 @@ Report security concerns privately to `karim.bosch@hotmail.com` with:
 - the affected plugin or website version; and
 - the potential impact.
 
-Connection tokens are portfolio-ingestion credentials only. A potentially
-exposed token should be replaced immediately from the GE Trends account page.
+Connection tokens can ingest offer and coin updates and retrieve only the
+connected user's summarized portfolio and holdings. They cannot sign in, change
+an account, or access another member. A potentially exposed token should be
+replaced immediately from the GE Trends account page.

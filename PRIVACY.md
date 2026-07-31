@@ -1,6 +1,6 @@
 # Privacy
 
-GE Trends Portfolio synchronizes a user's own Grand Exchange offer state with
+GE Trends synchronizes a user's own Grand Exchange offer state with
 the GE Trends account connected by a revocable token.
 
 ## Data sent
@@ -18,6 +18,16 @@ equipment, location, chat, or other-player data.
 The user's IP address is necessarily processed by the HTTPS hosting provider
 when a request is made. Cloud synchronization is disabled by default and
 RuneLite displays a third-party-server warning before it is enabled.
+
+Opening or refreshing the Portfolio panel retrieves only the connected token
+owner's summarized totals and current holdings. The response does not include
+email, password, MFA data, account-management data, or another user's data.
+
+If **Market lookup** is separately enabled, the plugin requests the public item
+catalog, latest price, and time series from `prices.runescape.wiki`. Those
+requests disclose the requested item ID and the user's IP address to the Wiki
+hosting provider. They do not include the GE Trends token, RuneLite identity,
+character name, or portfolio data.
 
 ## Purpose and retention
 
@@ -44,4 +54,12 @@ The plugin sends data only to:
 
 `https://ge-trends.vercel.app/api/portfolio/coins`
 
-The destination is fixed in source code and cannot be configured by the user.
+`https://ge-trends.vercel.app/api/portfolio/plugin`
+
+`https://prices.runescape.wiki/api/v1/osrs/mapping`
+
+`https://prices.runescape.wiki/api/v1/osrs/latest`
+
+`https://prices.runescape.wiki/api/v1/osrs/timeseries`
+
+The destinations are fixed in source code and cannot be configured by the user.
