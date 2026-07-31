@@ -367,6 +367,7 @@ final class GeTrendsApiClient
 	{
 		PortfolioSummary summary;
 		List<Holding> holdings;
+		List<ClosedTrade> closedTrades;
 		String lastRuneLiteSync;
 		boolean includeLiquidGp;
 	}
@@ -392,5 +393,20 @@ final class GeTrendsApiClient
 		Double marketValue;
 		Double unrealizedProfit;
 		Double unrealizedPercent;
+	}
+
+	static final class ClosedTrade
+	{
+		String id;
+		int itemId;
+		String name;
+		double quantity;
+		double averageBuyPrice;
+		double sellPrice;
+		double geTax;
+		double netProceeds;
+		double realizedProfit;
+		double roi;
+		String soldAt;
 	}
 }

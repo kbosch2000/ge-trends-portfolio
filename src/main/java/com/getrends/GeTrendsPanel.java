@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import javax.inject.Inject;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -359,7 +360,70 @@ final class GeTrendsPanel extends PluginPanel
 				portfolioContent.add(Box.createVerticalStrut(5));
 			}
 		}
+		portfolioContent.add(Box.createVerticalStrut(10));
+		renderClosedTrades(portfolio);
 		refresh(portfolioContent);
+	}
+
+	private void renderClosedTrades(GeTrendsApiClient.PortfolioSnapshot portfolio)
+	{
+		JLabel title = new JLabel("<html><b>Closed trade performance</b></html>");
+		title.setAlignmentX(Component.LEFT_ALIGNMENT);
+		portfolioContent.add(title);
+		portfolioContent.add(Box.createVerticalStrut(6));
+		if (portfolio.closedTrades == null || portfolio.closedTrades.isEmpty())
+		{
+			portfolioContent.add(mutedLabel("Completed matched sales will appear here."));
+			return;
+		}
+
+		GeTrendsApiClient.ClosedTrade best = null;
+		int profitable = 0;
+		for (GeTrendsApiClient.ClosedTrade trade : portfolio.closedTrades)
+		{
+			if (trade.realizedProfit > 0)
+			{
+				profitable++;
+			}
+			if (best == null || trade.realizedProfit > best.realizedProfit)
+			{
+				best = trade;
+			}
+		}
+		JPanel summary = card();
+		summary.add(statRow(
+			"Win rate",
+			String.format(Locale.ENGLISH, "%.1f%%", profitable * 100d / portfolio.closedTrades.size()),
+			profitable * 2 >= portfolio.closedTrades.size() ? GREEN : GOLD
+		));
+		summary.add(statRow(
+			"Best sale",
+			best == null ? "—" : signedGp(best.realizedProfit),
+			best != null && best.realizedProfit >= 0 ? GREEN : RED
+		));
+		if (best != null)
+		{
+			summary.add(mutedLabel(best.name + " · " + PERCENT.format(best.roi) + "% ROI"));
+		}
+		portfolioContent.add(summary);
+		portfolioContent.add(Box.createVerticalStrut(6));
+
+		int displayed = Math.min(10, portfolio.closedTrades.size());
+		for (int index = 0; index < displayed; index++)
+		{
+			GeTrendsApiClient.ClosedTrade trade = portfolio.closedTrades.get(index);
+			JPanel row = card();
+			row.add(new JLabel("<html><b>" + html(trade.name) + "</b></html>"));
+			row.add(mutedLabel(WHOLE_GP.format(trade.quantity) + " sold · "
+				+ gp(trade.sellPrice)));
+			row.add(statRow(
+				"Realized",
+				signedGp(trade.realizedProfit) + "  " + PERCENT.format(trade.roi) + "%",
+				trade.realizedProfit >= 0 ? GREEN : RED
+			));
+			portfolioContent.add(row);
+			portfolioContent.add(Box.createVerticalStrut(5));
+		}
 	}
 
 	private static JPanel statRow(String label, String value, Color valueColor)

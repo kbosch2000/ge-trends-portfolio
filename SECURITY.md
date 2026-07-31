@@ -11,6 +11,7 @@ Report security concerns privately to `karim.bosch@hotmail.com` with:
 - the potential impact.
 
 Connection tokens can ingest offer and coin updates and retrieve only the
-connected user's summarized portfolio and holdings. They cannot sign in, change
-an account, or access another member. A potentially exposed token should be
-replaced immediately from the GE Trends account page.
+connected user's summarized portfolio, holdings, and calculated closed-sale
+results. They cannot sign in, change an account, or access another member. A
+potentially exposed token should be replaced immediately from the GE Trends
+account page.

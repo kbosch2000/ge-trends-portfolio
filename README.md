@@ -6,7 +6,8 @@ GE Trends is an opt-in, read-only RuneLite companion for the
 The sidebar contains:
 
 - **Portfolio** — a compact view of the connected user's own portfolio value,
-  realized and unrealized P/L, liquid GP, GE-held GP, and open investments.
+  realized and unrealized P/L, liquid GP, GE-held GP, open investments, and
+  calculated closed-sale performance.
 - **Market** — item search, live Wiki high/buy and low/sell prices, spread, GE
   buy limit, and a compact 30-day chart usable from anywhere in game.
 
@@ -70,7 +71,8 @@ necessarily visible to the hosting provider.
 
 When the connected user opens or refreshes the Portfolio panel, the token is
 sent to the fixed GE Trends portfolio endpoint. The response contains only that
-token owner's summarized totals and current holdings. It does not contain an
+token owner's summarized totals, current holdings, and calculated closed-sale
+results. It does not contain an
 email address, password, MFA data, raw token, other member data, or account
 administration controls.
 

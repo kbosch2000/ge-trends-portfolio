@@ -20,8 +20,9 @@ when a request is made. Cloud synchronization is disabled by default and
 RuneLite displays a third-party-server warning before it is enabled.
 
 Opening or refreshing the Portfolio panel retrieves only the connected token
-owner's summarized totals and current holdings. The response does not include
-email, password, MFA data, account-management data, or another user's data.
+owner's summarized totals, current holdings, and calculated closed-sale
+results. The response does not include email, password, MFA data,
+account-management data, or another user's data.
 
 If **Market lookup** is separately enabled, the plugin requests the public item
 catalog, latest price, and time series from `prices.runescape.wiki`. Those
