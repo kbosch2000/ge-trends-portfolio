@@ -414,8 +414,11 @@ final class GeTrendsPanel extends PluginPanel
 			GeTrendsApiClient.ClosedTrade trade = portfolio.closedTrades.get(index);
 			JPanel row = card();
 			row.add(new JLabel("<html><b>" + html(trade.name) + "</b></html>"));
-			row.add(mutedLabel(WHOLE_GP.format(trade.quantity) + " sold · "
-				+ gp(trade.sellPrice)));
+			row.add(mutedLabel(
+				(trade.positionClosed ? "Closed" : "Partial exit")
+					+ " · " + WHOLE_GP.format(trade.quantity) + " sold · "
+					+ gp(trade.sellPrice)
+			));
 			row.add(statRow(
 				"Realized",
 				signedGp(trade.realizedProfit) + "  " + PERCENT.format(trade.roi) + "%",

@@ -7,7 +7,7 @@ The sidebar contains:
 
 - **Portfolio** — a compact view of the connected user's own portfolio value,
   realized and unrealized P/L, liquid GP, GE-held GP, open investments, and
-  calculated closed-sale performance.
+  calculated trade-cycle performance with partial fills compressed.
 - **Market** — item search, live Wiki high/buy and low/sell prices, spread, GE
   buy limit, and a compact 30-day chart usable from anywhere in game.
 

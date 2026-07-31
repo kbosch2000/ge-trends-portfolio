@@ -408,5 +408,6 @@ final class GeTrendsApiClient
 		double realizedProfit;
 		double roi;
 		String soldAt;
+		boolean positionClosed;
 	}
 }
