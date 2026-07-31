@@ -3,7 +3,9 @@
 Please do not publish connection tokens, authentication material, or a working
 exploit in a public issue.
 
-Report security concerns privately to `karim.bosch@hotmail.com` with:
+Report security concerns privately through the repository's
+[GitHub Security Advisory form](https://github.com/kbosch2000/ge-trends-portfolio/security/advisories/new)
+with:
 
 - a description of the issue;
 - reproduction steps;
